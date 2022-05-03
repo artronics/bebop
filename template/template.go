@@ -17,7 +17,7 @@ type SourceData struct {
 	Url string
 }
 
-type fileRenderer func(string) error
+type renderer func(path string) error
 
 var excludeDir = []string{".git", "node_modules", ".idea", ".vscode"}
 var excludeFileExt = []string{".zip", ".exe", ".tar", ".tar.gz", ".jar"}
@@ -32,8 +32,9 @@ func Template(sourceData SourceData) (err error) {
 		"SERVICE_NAME": "Jalal test",
 	}
 
-	renderer := makeRenderer(m)
-	err = walkFiles(path, renderer)
+	r := makeRenderer(m)
+	err = walker(path, r)
+	//err = walkFiles(path, m)
 	if err != nil {
 		return err
 	}
@@ -74,10 +75,14 @@ func gitClone(data SourceData) (string, error) {
 	return tempDir, nil
 }
 
-func makeRenderer(data map[string]interface{}) fileRenderer {
+func makeRenderer(data map[string]interface{}) renderer {
 	return func(path string) error {
-		log.Println(path)
 		f, err := ioutil.ReadFile(path)
+		if err != nil {
+			return err
+		}
+
+		err = os.Remove(path)
 		if err != nil {
 			return err
 		}
@@ -105,7 +110,40 @@ func makeRenderer(data map[string]interface{}) fileRenderer {
 	}
 }
 
-func walkFiles(path string, fn fileRenderer) error {
+func renderTemplate(path string, data map[string]interface{}) (err error) {
+	f, err := ioutil.ReadFile(path)
+	if err != nil {
+		return err
+	}
+
+	err = os.Remove(path)
+	if err != nil {
+		return err
+	}
+
+	template := fasttemplate.New(string(f), "{{ ", " }}")
+
+	renderedFile, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		err = renderedFile.Close()
+	}()
+
+	w := bufio.NewWriter(renderedFile)
+	_, err = template.Execute(w, data)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		err = w.Flush()
+	}()
+
+	return err
+}
+
+func walker(path string, renderer renderer) error {
 	err := filepath.Walk(path,
 		func(path string, info os.FileInfo, err error) error {
 			if err != nil {
@@ -124,19 +162,44 @@ func walkFiles(path string, fn fileRenderer) error {
 				return nil
 			}
 
-			err = fn(path)
+			log.Println("printing", path)
+			err = renderer(path)
+			return err
+		})
+
+	return err
+}
+func walkFiles(path string, data map[string]interface{}) error {
+	err := filepath.Walk(path,
+		func(path string, info os.FileInfo, err error) error {
 			if err != nil {
 				return err
 			}
+			if info.IsDir() {
+				return nil
+			}
 
+			ps := strings.Split(path, string(os.PathSeparator))
+			if isExcluded(ps[0], true) {
+				return nil
+			}
+
+			if isExcluded(info.Name(), false) {
+				return nil
+			}
+
+			log.Println("printing", path)
+			err = renderTemplate(path, data)
+			if err != nil {
+				return err
+			}
 			return nil
 		})
-
 	if err != nil {
 		return err
 	}
-
 	return nil
+
 }
 
 func isExcluded(s string, isDir bool) bool {
