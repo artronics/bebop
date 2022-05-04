@@ -1,15 +1,13 @@
-package template
+package pkg
 
 import (
 	"bufio"
-	"errors"
+	"github.com/nhsdigital/bebop-cli/internal"
 	"github.com/valyala/fasttemplate"
 	"io/ioutil"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
-	"syscall"
 )
 
 type SourceData struct {
@@ -43,34 +41,15 @@ func Template(sourceData SourceData) (err error) {
 }
 
 func gitClone(data SourceData) (string, error) {
-	binary, err := exec.LookPath("git")
-	if err != nil {
-		return "", errors.New("couldn't find git executable. Make sure git is installed")
-	}
-
 	tempDir, err := ioutil.TempDir("", "template-*")
 	if err != nil {
 		return "", err
 	}
 
-	args := []string{binary, "clone", data.Url, tempDir}
-	atr := syscall.ProcAttr{}
+	args := []string{"git", "clone", data.Url, tempDir}
+	err = internal.ExecBlocking("git", args)
 
-	pid, err := syscall.ForkExec(binary, args, &atr)
-	if err != nil {
-		return "", err
-	}
-
-	s, err := os.FindProcess(pid)
-	if err != nil {
-		return "", err
-	}
-	_, err = s.Wait()
-	if err != nil {
-		return "", err
-	}
-
-	return tempDir, nil
+	return tempDir, err
 }
 
 func makeRenderer(data map[string]interface{}) renderer {

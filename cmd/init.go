@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"github.com/nhsdigital/bebop-cli/template"
+	"github.com/nhsdigital/bebop-cli/pkg"
 	"github.com/spf13/cobra"
 	"log"
 )
@@ -17,10 +17,10 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		sd := template.SourceData{}
+		sd := pkg.SourceData{}
 		sd.Url = cmd.Flags().Lookup("template").Value.String()
 
-		err := template.Template(sd)
+		err := pkg.Template(sd)
 		if err != nil {
 			log.Fatal(err.Error())
 		}
