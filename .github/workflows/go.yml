@@ -46,8 +46,8 @@ jobs:
     - name: Build
       run: go build -o ./build/bebop
 
-    - name: Test
-      run: go test -v ./...
+#    - name: Test
+#      run: go test -v ./...
 
     - uses: rymndhng/release-on-push-action@master
       with:
