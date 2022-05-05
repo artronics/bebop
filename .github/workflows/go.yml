@@ -11,7 +11,6 @@ jobs:
   build:
     strategy:
       matrix:
-        version: [ 10, 12, 14 ]
         os: [ ubuntu-latest, windows-latest ]
     runs-on: ${{ matrix.os }}
     steps:
@@ -23,10 +22,17 @@ jobs:
         go-version: 1.18
 
     - name: Build
-      run: go build -v ./...
+      run: go build -o ./build/bebop
 
     - name: Test
       run: go test -v ./...
+
+    - name: Archive production artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: bebop-${{ matrix.os}}
+        path: |
+          build/bebop
 
     - name: release
       uses: actions/create-release@v1
@@ -37,5 +43,6 @@ jobs:
         release_name: ${{ steps.version.outputs.version }}
         tag_name: ${{ github.ref }}
         body_path: CHANGELOG.md
-#      env:
-#        GITHUB_TOKEN: ${{ github.token }}
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+
