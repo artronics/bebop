@@ -15,7 +15,21 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [ ubuntu-latest, windows-latest ]
+        kind: [ 'linux', 'windows', 'macOS' ]
+        include:
+          - kind: linux
+            os: ubuntu-latest
+            target: linux-x64
+            release_suffix: ''
+          - kind: windows
+            os: windows-latest
+            target: win-x64
+            release_suffix: .exe
+          - kind: macOS
+            os: macos-latest
+            target: osx-x64
+            release_suffix: ''
+
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v3
@@ -31,21 +45,10 @@ jobs:
     - name: Test
       run: go test -v ./...
 
-    - name: Archive production artifacts
-      uses: actions/upload-artifact@v3
+    - name: Upload binaries to release
+      uses: svenstaro/upload-release-action@v2
       with:
-        name: bebop-${{ matrix.os}}
-        path: |
-          build/bebop
-
-    - name: release
-      uses: actions/create-release@v1
-      id: create_release
-      with:
-        draft: false
-        prerelease: false
-        release_name: ${{ steps.version.outputs.version }}
-        tag_name: ${{ github.ref }}
-      env:
-        GITHUB_TOKEN: ${{ github.token }}
-
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: bebop
+        asset_name: bebop-${{ matrix.kind }}-${{ needs.build.outputs.release_version }}
+        tag: ${{ needs.build.outputs.release_version }}
