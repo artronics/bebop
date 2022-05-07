@@ -23,7 +23,7 @@ type AwsLoginData struct {
 	Credentials credentials `json:"Credentials"`
 }
 
-func Login(config AwsConfig) (_ string, err error) {
+func AwsLogin(config AwsConfig) (_ string, err error) {
 	mfa := fmt.Sprintf("arn:aws:iam::%s:mfa/%s", config.AccountId, config.Username)
 	args := []string{"--profile", config.Profile, "sts", "get-session-token",
 		"--serial-number", mfa, "--token-code", config.Mfa, "--duration-seconds", "129600", "--output", "json"}

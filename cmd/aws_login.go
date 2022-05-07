@@ -9,7 +9,7 @@ import (
 	"os"
 )
 
-var loginCmd = &cobra.Command{
+var awsLoginCmd = &cobra.Command{
 	Use:   "login",
 	Short: "A brief description of your command",
 	Long: `A longer description that spans multiple lines and likely contains examples
@@ -33,7 +33,7 @@ to quickly create a Cobra application.`,
 		config.Username = cmd.Flags().Lookup("username").Value.String()
 		config.Mfa = cmd.Flags().Lookup("mfa").Value.String()
 
-		data, err := pkg.Login(config)
+		data, err := pkg.AwsLogin(config)
 		if err != nil {
 			log.Fatalln(err.Error())
 		}
@@ -53,19 +53,19 @@ to quickly create a Cobra application.`,
 }
 
 func init() {
-	loginCmd.Flags().StringP("account", "a", "", "aws account ID. It should be a 12-digit number")
-	_ = loginCmd.MarkFlagRequired("account")
+	awsLoginCmd.Flags().StringP("account", "a", "", "aws account ID. It should be a 12-digit number")
+	_ = awsLoginCmd.MarkFlagRequired("account")
 
-	loginCmd.Flags().StringP("username", "u", "", "aws username. it should be your nhs email username by default")
-	_ = loginCmd.MarkFlagRequired("username")
+	awsLoginCmd.Flags().StringP("username", "u", "", "aws username. it should be your nhs email username by default")
+	_ = awsLoginCmd.MarkFlagRequired("username")
 
-	loginCmd.Flags().StringP("mfa", "m", "", "MFA (Multi-Factor Authentication) code")
-	_ = loginCmd.MarkFlagRequired("mfa")
+	awsLoginCmd.Flags().StringP("mfa", "m", "", "MFA (Multi-Factor Authentication) code")
+	_ = awsLoginCmd.MarkFlagRequired("mfa")
 
-	loginCmd.Flags().String("out-profile", "", `If set, then login will create a new profile or update
+	awsLoginCmd.Flags().String("out-profile", "", `If set, then login will create a new profile or update
 existing one. If this value is not set then it will fallback to aws cli default format`)
 
-	awsCmd.AddCommand(loginCmd)
+	awsCmd.AddCommand(awsLoginCmd)
 }
 
 func overwriteProfile(profile string, data string) error {
