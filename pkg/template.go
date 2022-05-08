@@ -3,8 +3,10 @@ package pkg
 import (
 	"bufio"
 	"github.com/nhsdigital/bebop-cli/internal"
+	cp "github.com/otiai10/copy"
 	"github.com/valyala/fasttemplate"
 	"io/ioutil"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -21,32 +23,42 @@ type SourceData struct {
 type renderer func(path string) error
 
 func Template(sourceData SourceData) (err error) {
-	tmpDir, err := gitClone(sourceData)
+	srcUrl, _ := url.Parse(sourceData.Url)
+	tempDir, err := ioutil.TempDir("", "template-*")
 	if err != nil {
 		return err
+	}
+
+	if srcUrl.Scheme == "https" {
+		err = gitClone(sourceData, tempDir)
+		if err != nil {
+			return err
+		}
+
+	} else if srcUrl.Scheme == "file" {
+		src := filepath.Join(srcUrl.Host, srcUrl.Path)
+		err = cp.Copy(src, tempDir)
+		if err != nil {
+			return err
+		}
 	}
 
 	r := makeRenderer(sourceData.TemplateData)
-	err = walkFiles(tmpDir, r, sourceData.ExcludedDirs, sourceData.ExcludedFiles)
+	err = walkFiles(tempDir, r, sourceData.ExcludedDirs, sourceData.ExcludedFiles)
 	if err != nil {
 		return err
 	}
 
-	err = os.Rename(tmpDir, sourceData.OutputDir)
+	err = os.Rename(tempDir, sourceData.OutputDir)
 
 	return err
 }
 
-func gitClone(data SourceData) (string, error) {
-	tempDir, err := ioutil.TempDir("", "template-*")
-	if err != nil {
-		return "", err
-	}
-
+func gitClone(data SourceData, tempDir string) error {
 	args := []string{"git", "clone", data.Url, tempDir}
-	err = internal.ExecBlocking("git", args)
+	err := internal.ExecBlocking("git", args)
 
-	return tempDir, err
+	return err
 }
 
 func makeRenderer(data map[string]interface{}) renderer {
@@ -95,6 +107,7 @@ func walkFiles(tmpDir string, renderer renderer, excludeDir []string, excludeFil
 	}
 	isFileExcluded := func(s string) bool {
 		for _, v := range excludeFileExt {
+			// TODO: change it to filepath.Ext()
 			if strings.HasSuffix(s, v) {
 				return true
 			}
