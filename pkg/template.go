@@ -11,13 +11,14 @@ import (
 )
 
 type SourceData struct {
-	Url string
+	Url           string
+	OutputDir     string
+	TemplateData  map[string]interface{}
+	ExcludedDirs  []string
+	ExcludedFiles []string
 }
 
 type renderer func(path string) error
-
-var excludeDir = []string{".git", "node_modules", ".idea", ".vscode"}
-var excludeFileExt = []string{".zip", ".exe", ".tar", ".tar.gz", ".jar"}
 
 func Template(sourceData SourceData) (err error) {
 	tmpDir, err := gitClone(sourceData)
@@ -25,17 +26,13 @@ func Template(sourceData SourceData) (err error) {
 		return err
 	}
 
-	m := map[string]interface{}{
-		"SERVICE_NAME": "Jalal test",
-	}
-
-	r := makeRenderer(m)
-	err = walkFiles(tmpDir, r)
+	r := makeRenderer(sourceData.TemplateData)
+	err = walkFiles(tmpDir, r, sourceData.ExcludedDirs, sourceData.ExcludedFiles)
 	if err != nil {
 		return err
 	}
 
-	err = os.Rename(tmpDir, "./build/rendered")
+	err = os.Rename(tmpDir, sourceData.OutputDir)
 
 	return err
 }
@@ -87,7 +84,7 @@ func makeRenderer(data map[string]interface{}) renderer {
 	}
 }
 
-func walkFiles(tmpDir string, renderer renderer) error {
+func walkFiles(tmpDir string, renderer renderer, excludeDir []string, excludeFileExt []string) error {
 	isDirExcluded := func(s string) bool {
 		for _, v := range excludeDir {
 			if v == s {
