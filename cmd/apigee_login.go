@@ -10,13 +10,9 @@ import (
 
 var apigeeLoginCmd = &cobra.Command{
 	Use:   "login",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Login to apigee and get an access token",
+	Long: `You need to provide your apigee username and password. If password is empty then APIGEE_PASSWORD environment
+variable will be read instead. If your account has MFA you can pass your code. This command will not prompt users.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		config := pkg.ApigeeConfig{}
 

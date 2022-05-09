@@ -6,13 +6,9 @@ import (
 
 var projectCmd = &cobra.Command{
 	Use:   "project",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Creating, managing and maintaining a project.",
+	Long: `A proxy project is following a standard template. This command provides 
+all the tools necessary to initialise and maintain certain aspects of a project.`,
 }
 
 func init() {

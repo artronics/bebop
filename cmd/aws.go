@@ -4,16 +4,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// awsCmd represents the aws command
 var awsCmd = &cobra.Command{
 	Use:   "aws",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Managing commands related to aws. It requires aws-cli as a dependency",
+	Long:  `You can use this command to login and TODO:`,
 }
 
 func init() {

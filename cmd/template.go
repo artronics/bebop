@@ -15,7 +15,7 @@ import (
 
 var templateCmd = &cobra.Command{
 	Use:   "template",
-	Short: "template files in a directory give a data file in either json or yaml format",
+	Short: "template files in a directory given a data file in either json or yaml format",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		sd, err := setTemplateSourceData(cmd)
@@ -25,7 +25,6 @@ var templateCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(err.Error())
 		}
-
 	},
 }
 
