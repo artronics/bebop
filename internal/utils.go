@@ -1,10 +1,14 @@
 package internal
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
+	"gopkg.in/yaml.v3"
+	"io/ioutil"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"syscall"
 )
@@ -80,4 +84,39 @@ func JustRun(bin string, args []string) (string, error) {
 	}
 
 	return stdOut.String(), nil
+}
+
+func ParseDataFile(path string) (map[string]interface{}, error) {
+	var data map[string]interface{}
+
+	file, err := os.Open(path)
+	if err != nil {
+		return data, err
+	}
+	defer func() {
+		err = file.Close()
+	}()
+	bb, err := ioutil.ReadAll(file)
+	if err != nil {
+		return data, err
+	}
+
+	ext := filepath.Ext(file.Name())
+	if ext == ".json" {
+		err = json.Unmarshal(bb, &data)
+		if err != nil {
+			return data, err
+		}
+
+	} else if ext == ".yml" || ext == ".yaml" {
+		err = yaml.Unmarshal(bb, &data)
+		if err != nil {
+			return data, err
+		}
+
+	} else {
+		return data, errors.New("this file format is not supported")
+	}
+
+	return data, err
 }

@@ -1,16 +1,10 @@
 package cmd
 
 import (
-	"encoding/json"
-	"errors"
+	"github.com/nhsdigital/bebop-cli/internal"
 	"github.com/nhsdigital/bebop-cli/pkg"
-	"gopkg.in/yaml.v3"
-	"io/ioutil"
-	"log"
-	"os"
-	"path/filepath"
-
 	"github.com/spf13/cobra"
+	"log"
 )
 
 var templateCmd = &cobra.Command{
@@ -65,46 +59,11 @@ func setTemplateSourceData(cmd *cobra.Command) (pkg.SourceData, error) {
 	}
 	sd.ExcludedFiles = excFilesExt
 
-	templateData, err := parseTemplateData(cmd.Flags().Lookup("var-file").Value.String())
+	templateData, err := internal.ParseDataFile(cmd.Flags().Lookup("var-file").Value.String())
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 	sd.TemplateData = templateData
 
 	return sd, nil
-}
-
-func parseTemplateData(path string) (map[string]interface{}, error) {
-	var data map[string]interface{}
-
-	file, err := os.Open(path)
-	if err != nil {
-		return data, err
-	}
-	defer func() {
-		err = file.Close()
-	}()
-	bb, err := ioutil.ReadAll(file)
-	if err != nil {
-		return data, err
-	}
-
-	ext := filepath.Ext(file.Name())
-	if ext == ".json" {
-		err = json.Unmarshal(bb, &data)
-		if err != nil {
-			return data, err
-		}
-
-	} else if ext == ".yml" || ext == ".yaml" {
-		err = yaml.Unmarshal(bb, &data)
-		if err != nil {
-			return data, err
-		}
-
-	} else {
-		return data, errors.New("this file format is not supported")
-	}
-
-	return data, err
 }
