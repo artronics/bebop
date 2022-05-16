@@ -36,28 +36,30 @@ jobs:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
     - name: Set up Go
       uses: actions/setup-go@v3
       with:
         go-version: 1.18
 
-    - name: Build
-      run: go build -o ./build/bebop
+      - name: Build
+        run: go build -o ./build/bebop
 
-#    - name: Test
-#      run: go test -v ./...
+      #    - name: Test
+      #      run: go test -v ./...
 
-#    - uses: rymndhng/release-on-push-action@master
-#      with:
-#        tag_prefix: "v"
-#        bump_version_scheme: minor
-
-    - name: Upload binaries to release
-      uses: svenstaro/upload-release-action@v2
-      with:
-        repo_token: ${{ secrets.GITHUB_TOKEN }}
-        file: build/bebop
-        asset_name: bebop-ubuntu
-        tag: ${{ github.ref_name }}
+      #    - uses: rymndhng/release-on-push-action@master
+      #      with:
+      #        tag_prefix: "v"
+      #        bump_version_scheme: minor
+      - name: Create release (master only)
+        id: create-release
+        if: github.ref == 'refs/heads/master'
+        uses: actions/create-release@v1
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v0.0.1
+          release_name: test-release
