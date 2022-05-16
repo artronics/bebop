@@ -1,18 +1,21 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
 	"github.com/nhsdigital/bebop-cli/internal"
 	"github.com/nhsdigital/bebop-cli/pkg"
 	"github.com/spf13/cobra"
+	"github.com/valyala/fasttemplate"
 	"log"
-	"regexp"
-	"strconv"
 	"strings"
+	"time"
 )
 
-const versionReg = "v(?P<major>\\d+)\\.(?P<minor>\\d+)\\.(?P<patch>\\d+)(?:-(?P<prerelease>alpha|beta))?"
+const releaseTemplate = ` #  --- DO NOT EDIT --- Auto-generated at: {{ time }}
+version: {{ version }}
+releaseId: {{ releaseId }}
+commitId: {{ commitId }}
+`
 
 var versionCmd = &cobra.Command{
 	Use:   "version",
@@ -21,7 +24,7 @@ var versionCmd = &cobra.Command{
 not only the version but also commit sha which can be used as template for some of the healthcheck responses. This
 command can also be used to bump versions which is useful during release process.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		d := pkg.VersionData{}
+		d := pkg.ReleaseData{}
 
 		path := cmd.Flags().Lookup("release-file").Value.String()
 		data, err := internal.ParseDataFile(path)
@@ -30,10 +33,7 @@ command can also be used to bump versions which is useful during release process
 		}
 
 		if version, ok := data["version"]; ok {
-			d.Version, err = parseVersion(version.(string))
-			if err != nil {
-				log.Fatalln(err.Error())
-			}
+			d.Version = version.(string)
 		}
 		if commitId, ok := data["commitId"]; ok {
 			d.CommitId = commitId.(string)
@@ -47,11 +47,12 @@ command can also be used to bump versions which is useful during release process
 			log.Fatalln(err.Error())
 		}
 
-		err = pkg.Version(&d, bump)
-		fmt.Println(d)
+		updated, err := pkg.Version(d, bump)
 		if err != nil {
 			log.Fatalln(err.Error())
 		}
+
+		fmt.Println(renderTemplate(updated))
 	},
 }
 
@@ -60,6 +61,12 @@ func init() {
 	_ = versionCmd.MarkFlagFilename("release-file")
 
 	versionCmd.Flags().String("bump", "minor", "bump version. Valid values are major, minor, patch")
+
+	versionCmd.Flags().String("releaseId", "", "The pipeline release number")
+	_ = versionCmd.MarkFlagRequired("releaseId")
+
+	versionCmd.Flags().String("commitId", "", "The git sha code of this version")
+	_ = versionCmd.MarkFlagRequired("commitId")
 
 	projectCmd.AddCommand(versionCmd)
 }
@@ -79,30 +86,14 @@ func validateOperation(bump string) pkg.BumpVersion {
 	return pkg.Patch
 }
 
-func parseVersion(v string) (pkg.VersionParsed, error) {
-	var version pkg.VersionParsed
-	r := regexp.MustCompile(versionReg)
-	matched := r.MatchString(v)
-	if !matched {
-		// FIXME: it still matches with v1.1.1-foo  prerelease part can be anything. The rest (numbers) work as expected
-		return version, errors.New("provided version doesn't match pattern: v{minor}.{major}.{patch}-{[alpha|beta]}")
-	}
+func renderTemplate(rd pkg.ReleaseData) string {
+	template := fasttemplate.New(releaseTemplate, "{{ ", " }}")
 
-	matches := r.FindStringSubmatch(v)
-	var toInt = func(idx string) int {
-		v := r.SubexpIndex(idx)
-		n, _ := strconv.ParseInt(matches[v], 10, 32)
+	data := map[string]interface{}{
+		"time":      time.Now().UTC().Format("2006-01-02 15:04:05"),
+		"commitId":  rd.CommitId,
+		"releaseId": rd.ReleaseId,
+		"version":   rd.Version}
 
-		return int(n)
-	}
-
-	version.Major = toInt("major")
-	version.Minor = toInt("minor")
-	version.Patch = toInt("patch")
-
-	if pre := r.SubexpIndex("prerelease"); pre != -1 {
-		version.Prerelease = matches[pre]
-	}
-
-	return version, nil
+	return template.ExecuteString(data)
 }
