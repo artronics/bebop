@@ -62,11 +62,15 @@ jobs:
           echo ${releaseId}
           echo "./build/bebop project version --bump patch --release-file ./release.yml --releaseId ${releaseId} --commitId ${commitId}"
           content=$(./build/bebop project version --bump patch --release-file ./release.yml --releaseId ${releaseId} --commitId ${commitId})
-          echo content > ./release.yml
+          echo ${content} > ./release.yml
           git config --global user.name "$(git --no-pager log --format=format:'%an' -n 1)"
           git config --global user.email "$(git --no-pager log --format=format:'%ae' -n 1)"          
           git commit -am "Bump version"
           git push 
+          
+          version=$(cat release.yml | grep version | awk  '{print $2}')
+          echo ${version}
+          echo "::set-output name=release_version::${version}"
 
       - name: Create release (master only)
         id: create-release
@@ -76,5 +80,5 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: v0.0.1
-          release_name: test-release
+          tag_name: ${{ steps.vars.outputs.release_version }}
+          release_name: ${{ steps.vars.outputs.release_version }}
