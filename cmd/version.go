@@ -7,6 +7,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/valyala/fasttemplate"
 	"log"
+	"os"
 	"strings"
 	"time"
 )
@@ -47,7 +48,19 @@ command can also be used to bump versions which is useful during release process
 			log.Fatalln(err.Error())
 		}
 
-		fmt.Println(renderTemplate(updated))
+		content := renderTemplate(updated)
+		f, err := os.Create(path)
+		defer f.Close()
+
+		if err != nil {
+			log.Fatalln(err.Error())
+		}
+		_, err = fmt.Fprintf(f, "%s", content)
+		if err != nil {
+			log.Fatalln(err.Error())
+		}
+
+		fmt.Println(updated.Version)
 	},
 }
 

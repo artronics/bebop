@@ -58,17 +58,14 @@ jobs:
         run: |
           commitId=$(git show -s --format=%H)
           releaseId=${{ github.run_id }}
-          echo ${commitId}
-          echo ${releaseId}
-          echo "./build/bebop project version --bump patch --release-file ./release.yml --releaseId ${releaseId} --commitId ${commitId}"
-          content=$(./build/bebop project version --bump patch --release-file ./release.yml --releaseId ${releaseId} --commitId ${commitId})
-          echo ${content} > ./release.yml
+          
+          version=$(./build/bebop project version --bump patch --release-file ./release.yml --releaseId ${releaseId} --commitId ${commitId})
+          
           git config --global user.name "$(git --no-pager log --format=format:'%an' -n 1)"
           git config --global user.email "$(git --no-pager log --format=format:'%ae' -n 1)"          
           git commit -am "Bump version"
           git push 
           
-          version=$(cat release.yml | grep version | awk  '{print $2}')
           echo ${version}
           echo "::set-output name=release_version::${version}"
 
