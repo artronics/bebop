@@ -72,12 +72,12 @@ jobs:
 
       - name: Check
         run: |
-          echo "release version"
-          echo ${{ steps.vars.outputs.release_version }} 1
-          echo ${{ outputs.release_version }} 2
-          echo ${{ outputs.release_version }} 3
-          echo ${{ outputs.bump_version.release_version }} 4
-          echo ${{ steps.vars.outputs.bump_version.release_version }} 5
+               echo "release version"
+               echo ${{ steps.vars.outputs.release_version }} 1
+          #          echo ${{ outputs.release_version }} 2
+          #          echo ${{ outputs.release_version }} 3
+          #          echo ${{ outputs.bump_version.release_version }} 4
+               echo ${{ steps.vars.outputs.bump_version.release_version }} 5
 
       - name: Create release (master only)
         id: create-release
