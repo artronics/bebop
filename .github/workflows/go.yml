@@ -62,7 +62,7 @@ jobs:
           content=$(./build/bebop project version --bump patch --release-file ./release.yml --releaseId ${releaseId} --commitId ${commitId})
           echo content > ./release.yml
           git config --global user.name 'Pipeline'
-          git config --global user.email 'githubaction@github.com'
+          git config --global user.email 'artronics@users.noreply.github.com'
           git commit -am "Bump version"
           git push 
 
