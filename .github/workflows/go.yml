@@ -13,22 +13,22 @@ permissions:
 jobs:
 
   build:
-#    strategy:
-#      matrix:
-#        kind: [ 'linux', 'windows', 'macOS' ]
-#        include:
-#          - kind: linux
-#            os: ubuntu-latest
-#            target: linux-x64
-#            release_suffix: ''
-#          - kind: windows
-#            os: windows-latest
-#            target: win-x64
-#            release_suffix: .exe
-#          - kind: macOS
-#            os: macos-latest
-#            target: osx-x64
-#            release_suffix: ''
+    #    strategy:
+    #      matrix:
+    #        kind: [ 'linux', 'windows', 'macOS' ]
+    #        include:
+    #          - kind: linux
+    #            os: ubuntu-latest
+    #            target: linux-x64
+    #            release_suffix: ''
+    #          - kind: windows
+    #            os: windows-latest
+    #            target: win-x64
+    #            release_suffix: .exe
+    #          - kind: macOS
+    #            os: macos-latest
+    #            target: osx-x64
+    #            release_suffix: ''
 
     runs-on: ubuntu-20.04
 
@@ -38,10 +38,10 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-    - name: Set up Go
-      uses: actions/setup-go@v3
-      with:
-        go-version: 1.18
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.18
 
       - name: Build
         run: go build -o ./build/bebop
