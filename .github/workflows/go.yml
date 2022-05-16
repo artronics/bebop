@@ -67,7 +67,7 @@ jobs:
           git push 
           
           echo ${version}
-          echo "::set-output name=release_version::${version}"
+          echo ::set-output name=release_version::${version}
 
       - name: Create release (master only)
         id: create-release
