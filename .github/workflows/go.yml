@@ -49,10 +49,18 @@ jobs:
       #    - name: Test
       #      run: go test -v ./...
 
-      #    - uses: rymndhng/release-on-push-action@master
-      #      with:
-      #        tag_prefix: "v"
-      #        bump_version_scheme: minor
+      - name: Bump version
+        if: github.ref == 'refs/heads/master'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          commitId=$(git show -s --format=%H)
+          releaseId=${{ github.run_id }}
+          echo ${commitId}
+          echo ${releaseId}
+          echo "./build/bebop project version --bump patch --release-file ./release.yml --releaseId ${releaseId} --commitId ${commitId}"
+          ./build/bebop project version --bump patch --release-file ./release.yml --releaseId ${releaseId} --commitId ${commitId}
+
       - name: Create release (master only)
         id: create-release
         if: github.ref == 'refs/heads/master'
