@@ -67,15 +67,7 @@ jobs:
           git commit -am "Bump version"
           git push 
           
-          echo ${version}
           echo ::set-output name=release_version::${version}
-
-      - name: Check
-        run: |
-          echo "release version"
-          echo ${{ steps.vars.outputs.release_version }} 1
-          echo ${{ steps.vars.outputs.bump_version.release_version }} 5
-          echo ${{ steps.bump_version.outputs.release_version }} 6
 
       - name: Create release (master only)
         id: create-release
@@ -85,5 +77,5 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ steps.vars.outputs.release_version }}
-          release_name: ${{ steps.vars.outputs.release_version }}
+          tag_name: ${{ steps.bump_version.outputs.release_version }}
+          release_name: ${{ steps.bump_version.outputs.release_version }}
