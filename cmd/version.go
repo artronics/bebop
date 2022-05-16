@@ -24,30 +24,25 @@ var versionCmd = &cobra.Command{
 not only the version but also commit sha which can be used as template for some of the healthcheck responses. This
 command can also be used to bump versions which is useful during release process.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		d := pkg.ReleaseData{}
-
 		path := cmd.Flags().Lookup("release-file").Value.String()
 		data, err := internal.ParseDataFile(path)
 		if err != nil {
 			log.Fatalln(err.Error())
 		}
 
+		relData := pkg.ReleaseData{}
 		if version, ok := data["version"]; ok {
-			d.Version = version.(string)
+			relData.Version = version.(string)
 		}
-		if commitId, ok := data["commitId"]; ok {
-			d.CommitId = commitId.(string)
-		}
-		if releaseId, ok := data["releaseId"]; ok {
-			d.ReleaseId = releaseId.(string)
-		}
+		relData.CommitId = cmd.Flags().Lookup("commitId").Value.String()
+		relData.ReleaseId = cmd.Flags().Lookup("releaseId").Value.String()
 
 		bump := validateOperation(cmd.Flags().Lookup("bump").Value.String())
 		if err != nil {
 			log.Fatalln(err.Error())
 		}
 
-		updated, err := pkg.Version(d, bump)
+		updated, err := pkg.Version(relData, bump)
 		if err != nil {
 			log.Fatalln(err.Error())
 		}
