@@ -9,6 +9,8 @@ on:
 permissions:
   issues: write
   pull-requests: write
+  contents: write
+  packages: write
 
 jobs:
 
@@ -61,9 +63,8 @@ jobs:
           echo "./build/bebop project version --bump patch --release-file ./release.yml --releaseId ${releaseId} --commitId ${commitId}"
           content=$(./build/bebop project version --bump patch --release-file ./release.yml --releaseId ${releaseId} --commitId ${commitId})
           echo content > ./release.yml
-          git config --global user.name 'Pipeline'
-          git config --global user.email 'artronics@users.noreply.github.com'
-          git commit -am "Bump version"
+          git config --global user.name "$(git --no-pager log --format=format:'%an' -n 1)"
+          git config --global user.email "$(git --no-pager log --format=format:'%ae' -n 1)"          git commit -am "Bump version"
           git push 
 
       - name: Create release (master only)
