@@ -63,7 +63,7 @@ jobs:
         run: |
           bebop=./ubuntu-latest-bebop
           chmod +x ${bebop}
-          version=$(${bebop}/ubuntu-latest-bebop project version --bump patch --release-file ./release.yml)
+          version=$(${bebop} project version --bump patch --release-file ./release.yml)
           echo ::set-output name=release_version::${version}
 
       - name: Create Release
