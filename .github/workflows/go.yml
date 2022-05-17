@@ -61,10 +61,8 @@ jobs:
 
       - id: release_version
         run: |
-          ls -R .
-          #bebop=./build/ubuntu-latest-bebop/ubuntu-latest-bebop/ubuntu-latest-bebop
-          #chmod +x ${bebop}
-          bebop=./build/ubuntu-latest-bebop
+          bebop=./ubuntu-latest-bebop
+          chmod +x ${bebop}
           version=$(${bebop}/ubuntu-latest-bebop project version --bump patch --release-file ./release.yml)
           echo ::set-output name=release_version::${version}
 
