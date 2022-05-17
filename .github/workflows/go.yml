@@ -16,7 +16,7 @@ jobs:
   build:
     strategy:
       matrix:
-        kind: [ 'linux', 'macOS' ]
+        kind: [ 'linux' ]
         include:
 #          - kind: linux
           #            os: ubuntu-latest
