@@ -90,5 +90,7 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
-          file: ./ubuntu-latest-bebop/ubuntu-latest-bebop
+          files: |
+            ./ubuntu-latest-bebop/ubuntu-latest-bebop
+#            ./macos-latest-bebop/macos-latest-bebop
 
