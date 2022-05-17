@@ -61,7 +61,7 @@ jobs:
 
       - id: release_version
         run: |
-          ls -R ./build
+          ls -R .
           #bebop=./build/ubuntu-latest-bebop/ubuntu-latest-bebop/ubuntu-latest-bebop
           #chmod +x ${bebop}
           bebop=./build/ubuntu-latest-bebop
