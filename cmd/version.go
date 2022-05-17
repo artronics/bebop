@@ -48,6 +48,11 @@ command can also be used to bump versions which is useful during release process
 			log.Fatalln(err.Error())
 		}
 
+		if updated.ReleaseId == "" && updated.CommitId == "" {
+			fmt.Println(updated.Version)
+			return
+		}
+
 		content := renderTemplate(updated)
 		f, err := os.Create(path)
 		defer f.Close()
@@ -69,12 +74,8 @@ func init() {
 	_ = versionCmd.MarkFlagFilename("release-file")
 
 	versionCmd.Flags().String("bump", "minor", "bump version. Valid values are major, minor, patch")
-
 	versionCmd.Flags().String("releaseId", "", "The pipeline release number")
-	_ = versionCmd.MarkFlagRequired("releaseId")
-
 	versionCmd.Flags().String("commitId", "", "The git sha code of this version")
-	_ = versionCmd.MarkFlagRequired("commitId")
 
 	projectCmd.AddCommand(versionCmd)
 }
