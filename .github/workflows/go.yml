@@ -13,7 +13,6 @@ permissions:
   packages: write
 
 jobs:
-
   build:
     strategy:
       matrix:
@@ -27,12 +26,9 @@ jobs:
             os: macos-latest
             target: osx-x64
             release_suffix: ''
-
-    runs-on: ubuntu-20.04
-
+    runs-on: ${{ matrix.os }}
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
     steps:
       - uses: actions/checkout@v3
 
@@ -42,20 +38,45 @@ jobs:
           go-version: 1.18
 
       - name: Build
-        run: go build -o ./build/bebop
+        run: go build -o ./build/${{ matrix.os }}-bebop
 
       #    - name: Test
       #      run: go test -v ./...
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.os }}-bebop
+          path: ./build/${{ matrix.os }}-bebop
+
+  release:
+    needs: [ release ]
+    runs-on: ubuntu-20.04
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/download-artifact@v3
+        with:
+          path: ./build/ubuntu-latest-bebop
+
+      - id: release_version
+        run: |
+          version=$(./build/ubuntu-latest-bebop project version --bump patch --release-file ./release.yml)
+          echo ::set-output name=release_version::${version}
+
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.release_version.outputs.release_version }}
+          name: ${{ steps.release_version.outputs.release_version }}
 
       - name: Bump version
         id: bump_version
-        if: github.ref == 'refs/heads/main'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        # TODO: This is assigning run_id to releaseId. ReleaseId is not created until later
         run: |
           commitId=$(git show -s --format=%H)
-          releaseId=${{ github.run_id }}
+          releaseId=${{ steps.create_release.outputs.id }}
+          echo release-id: ${releaseId}
           
           version=$(./build/bebop project version --bump patch --release-file ./release.yml --releaseId ${releaseId} --commitId ${commitId})
           
@@ -63,13 +84,4 @@ jobs:
           git config --global user.email "$(git --no-pager log --format=format:'%ae' -n 1)"          
           git commit -am "New Release"
           git push 
-          
-          echo ::set-output name=release_version::${version}
-
-      - name: Release
-        uses: softprops/action-gh-release@v1
-        if: github.ref == 'refs/heads/main'
-        with:
-          tag_name: ${{ steps.bump_version.outputs.release_version }}
-          name: ${{ steps.bump_version.outputs.release_version }}
-          files: ./build/bebop
+        
