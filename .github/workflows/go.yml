@@ -92,6 +92,6 @@ jobs:
         uses: actions/upload-release-asset@v1
         with:
           upload_url: ${{ steps.create_release.outputs.url }}
-          asset_path: ./ubuntu-latest-bebop/ubuntu-latest-bebop
-          asset_name: bebop-linux-x64
+          asset_path: ./ubuntu-latest-bebop
+          asset_name: ubuntu-latest-bebop
           asset_content_type: application/x-binary
