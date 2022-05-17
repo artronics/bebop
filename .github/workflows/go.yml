@@ -57,12 +57,14 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/download-artifact@v3
         with:
-          path: ./build/ubuntu-latest-bebop
+          name: ubuntu-latest-bebop
 
       - id: release_version
         run: |
-          bebop=./build/ubuntu-latest-bebop/ubuntu-latest-bebop/ubuntu-latest-bebop
-          chmod +x ${bebop}
+          ls -R ./build
+          #bebop=./build/ubuntu-latest-bebop/ubuntu-latest-bebop/ubuntu-latest-bebop
+          #chmod +x ${bebop}
+          bebop=./build/ubuntu-latest-bebop
           version=$(${bebop}/ubuntu-latest-bebop project version --bump patch --release-file ./release.yml)
           echo ::set-output name=release_version::${version}
 
