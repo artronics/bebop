@@ -69,13 +69,20 @@ jobs:
           
           echo ::set-output name=release_version::${version}
 
-      - name: Create release (master only)
-        id: create-release
+      - name: Release
+        uses: softprops/action-gh-release@v1
         if: github.ref == 'refs/heads/main'
-        uses: actions/create-release@v1
-        continue-on-error: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ steps.bump_version.outputs.release_version }}
-          release_name: ${{ steps.bump_version.outputs.release_version }}
+          name: ${{ steps.bump_version.outputs.release_version }}
+
+#      - name: Create release (master only)
+#        id: create-release
+#        if: github.ref == 'refs/heads/main'
+#        uses: actions/create-release@v1
+#        continue-on-error: true
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        with:
+#          tag_name: ${{ steps.bump_version.outputs.release_version }}
+#          release_name: ${{ steps.bump_version.outputs.release_version }}
