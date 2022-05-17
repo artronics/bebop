@@ -61,9 +61,8 @@ jobs:
 
       - id: release_version
         run: |
-          bebop=./ubuntu-latest-bebop
-          chmod +x ${bebop}
-          version=$(${bebop} project version --bump patch --release-file ./release.yml)
+          chmod +x ./ubuntu-latest-bebop
+          version=$(./ubuntu-latest-bebop project version --bump patch --release-file ./release.yml)
           echo ::set-output name=release_version::${version}
 
       - name: Create Release
@@ -80,7 +79,7 @@ jobs:
           releaseId=${{ steps.create_release.outputs.id }}
           echo release-id: ${releaseId}
           
-          version=$(./build/bebop project version --bump patch --release-file ./release.yml --releaseId ${releaseId} --commitId ${commitId})
+          version=$(./ubuntu-latest-bebop project version --bump patch --release-file ./release.yml --releaseId ${releaseId} --commitId ${commitId})
           
           git config --global user.name "$(git --no-pager log --format=format:'%an' -n 1)"
           git config --global user.email "$(git --no-pager log --format=format:'%ae' -n 1)"          
