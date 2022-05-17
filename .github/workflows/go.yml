@@ -18,14 +18,14 @@ jobs:
       matrix:
         kind: [ 'linux' ]
         include:
-#          - kind: linux
-          #            os: ubuntu-latest
-          #            target: linux-x64
-          #            release_suffix: ''
-          - kind: macOS
-            os: macos-latest
-            target: osx-x64
+          - kind: linux
+            os: ubuntu-latest
+            target: linux-x64
             release_suffix: ''
+    #          - kind: macOS
+    #            os: macos-latest
+    #            target: osx-x64
+    #            release_suffix: ''
     runs-on: ${{ matrix.os }}
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
