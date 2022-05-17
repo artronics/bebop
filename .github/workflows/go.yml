@@ -56,8 +56,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: actions/download-artifact@v3
-        with:
-          name: ubuntu-latest-bebop
 
       - id: release_version
         run: |
@@ -85,4 +83,9 @@ jobs:
           git config --global user.email "$(git --no-pager log --format=format:'%ae' -n 1)"          
           git commit -am "New Release"
           git push 
-        
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          file: ./ubuntu-latest-bebop
+
