@@ -59,8 +59,10 @@ jobs:
 
       - id: release_version
         run: |
-          chmod +x ./ubuntu-latest-bebop
-          version=$(./ubuntu-latest-bebop project version --bump patch --release-file ./release.yml)
+          bebop=./ubuntu-latest-bebop/ubuntu-latest-bebop
+          chmod +x ${bebop}
+          ls -R ./ubuntu-latest-bebop
+          version=$(${bebop} project version --bump patch --release-file ./release.yml)
           echo ::set-output name=release_version::${version}
 
       - name: Create Release
@@ -77,7 +79,8 @@ jobs:
           releaseId=${{ steps.create_release.outputs.id }}
           echo release-id: ${releaseId}
           
-          version=$(./ubuntu-latest-bebop project version --bump patch --release-file ./release.yml --releaseId ${releaseId} --commitId ${commitId})
+          bebop=./ubuntu-latest-bebop/ubuntu-latest-bebop
+          version=$(${bebop} project version --bump patch --release-file ./release.yml --releaseId ${releaseId} --commitId ${commitId})
           
           git config --global user.name "$(git --no-pager log --format=format:'%an' -n 1)"
           git config --global user.email "$(git --no-pager log --format=format:'%ae' -n 1)"          
@@ -87,5 +90,5 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
-          file: ./ubuntu-latest-bebop
+          file: ./ubuntu-latest-bebop/ubuntu-latest-bebop
 
